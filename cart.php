@@ -189,7 +189,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                   <p>Charged: $<strong>" . htmlspecialchars($responseData['amount']) . "</strong></p>
                   <p>A confirmation email was sent to: <strong>" . htmlspecialchars($email) . "</strong></p>
                   <p>You will be redirected to the parts list shortly.</p></div>
-                  <script>setTimeout(function() { window.location.href = 'list.php'; }, 10000);</script>
+                  <script>setTimeout(function() { window.location.href = 'parts list.php'; }, 10000);</script>
                   </body></html>";
             exit;
         }
@@ -213,7 +213,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </style>
 </head>
 <body>
-<a href="list.php" style="text-decoration:none; font-size:16px;">&larr; Back to Parts List</a>
+<a href="parts list.php" style="text-decoration:none; font-size:16px;">&larr; Back to Parts List</a>
 <br />
     <h1>Your Shopping Cart</h1>
     <?php if (isset($_SESSION['cart']) && !empty($_SESSION['cart'])): ?>

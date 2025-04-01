@@ -5,11 +5,15 @@ $username = "student";
 $password = "student";
 $database = "csci467";
 
-// Create connection
-$conn = new mysqli($servername, $username, $password, $database);
+try {
+    // Create PDO connection with charset and error handling
+    $pdo = new PDO("mysql:host=$servername;dbname=$database;charset=utf8mb4", $username, $password);
 
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+    // Set PDO error mode to throw exceptions
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    // If connection fails, display error and exit
+    die("Connection failed: " . $e->getMessage());
 }
 ?>
+

@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $part_number = intval($part_number);
                 $quantity = intval($quantity);
                 if ($quantity > 0) {
-                    $stmt = $pdo->prepare("SELECT number, description, price, weight, pictureURL FROM parts WHERE number = :number");
+                    $stmt = $legacy_pdo->prepare("SELECT number, description, price, weight, pictureURL FROM parts WHERE number = :number");
                     $stmt->execute(['number' => $part_number]);
                     $row = $stmt->fetch(PDO::FETCH_ASSOC);
                     if ($row) {
@@ -64,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $part_number = intval($_POST['part_number']);
             $quantity = intval($_POST['quantity']);
             if ($quantity > 0) {
-                $stmt = $pdo->prepare("SELECT number, description, price, weight, pictureURL FROM parts WHERE number = :number");
+                $stmt = $legacy_pdo->prepare("SELECT number, description, price, weight, pictureURL FROM parts WHERE number = :number");
                 $stmt->execute(['number' => $part_number]);
                 $row = $stmt->fetch(PDO::FETCH_ASSOC);
                 if ($row) {
@@ -287,4 +287,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <?php
 }
 ?>
-

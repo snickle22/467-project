@@ -1,5 +1,5 @@
 <?php
-include 'db_connect.php'; // Use this for $new_pdo
+include 'db_connect.php'; 
 
 // 1. Get all orders that are marked as 'ready_to_ship'
 $stmt = $new_pdo->prepare("SELECT o.id, o.customer_email, o.status, GROUP_CONCAT(CONCAT(oi.quantity, ' x ', p.description) SEPARATOR ', ') AS items

@@ -2,7 +2,7 @@
 include 'db_connect.php'; 
 
 // 1. Get all orders that are marked as 'ready_to_ship'
-$stmt = $new_pdo->prepare("SELECT o.id, o.customer_email, o.status, GROUP_CONCAT(CONCAT(oi.quantity, ' x ', p.description) SEPARATOR ', ') AS items
+$stmt = $new_pdo->prepare("SELECT o.order_id, o.customer_email, o.status, GROUP_CONCAT(CONCAT(oi.quantity, ' x ', p.description) SEPARATOR ', ') AS items
                            FROM orders o
                            JOIN order_items oi ON o.order_id = oi.order_id
                            JOIN parts p ON oi.product_id = p.number

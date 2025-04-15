@@ -12,7 +12,7 @@ try {
 
 // Step 2: Get stock from the new (courses) database
 try {
-    $inventory_stmt = $new_pdo->query("SELECT part_number, stock FROM inventory");
+    $inventory_stmt = $new_pdo->query("SELECT part_number, quantity FROM inventory");
     $inventory_data = $inventory_stmt->fetchAll(PDO::FETCH_KEY_PAIR); // part_number => stock
 } catch (PDOException $e) {
     die("Error fetching inventory: " . $e->getMessage());
@@ -21,7 +21,7 @@ try {
 // Step 3: Merge stock into parts array
 foreach ($parts as &$part) {
     $num = $part['number'];
-    $part['stock'] = $inventory_data[$num] ?? 0;
+    $part['quantity'] = $inventory_data[$num] ?? 0;
 }
 ?>
 <!DOCTYPE html>
@@ -78,7 +78,7 @@ foreach ($parts as &$part) {
                             <strong><?php echo htmlspecialchars($row['description'] ?? ''); ?></strong><br>
                             Price: $<?php echo number_format($row['price'], 2); ?> |
                             Weight: <?php echo htmlspecialchars($row['weight'] ?? ''); ?> lbs |
-                            Stock: <?php echo (int)($row['stock'] ?? 0); ?> available
+                            Stock: <?php echo (int)($row['quantity'] ?? 0); ?> available
                         </div>
                         <label for="quantity_<?php echo htmlspecialchars($row['number'] ?? ''); ?>">Quantity:</label>
                         <input type="number" name="items[<?php echo htmlspecialchars($row['number'] ?? ''); ?>]"

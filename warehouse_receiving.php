@@ -1,41 +1,7 @@
 <?php
-// 1. Connect to the database using the updated db_connect.php
-include 'db_connect.php'; // Provides $legacy_pdo and $new_pdo
+// Any PHP logic you need
 
-// 2. Handle POST request to add stock quantities
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['update']) && is_array($_POST['update'])) {
-        $stmt = $new_pdo->prepare("UPDATE inventory SET quantity = quantity + :add_stock WHERE part_number = :number");
-        foreach ($_POST['update'] as $number => $add_stock) {
-            $number = filter_var($number, FILTER_VALIDATE_INT);
-            $add_stock = filter_var($add_stock, FILTER_VALIDATE_INT);
-            if ($number !== false && $add_stock !== false && $add_stock > 0) {
-                $stmt->execute([':add_stock' => $add_stock, ':number' => $number]);
-            }
-        }
-    }
-    header("Location: warehouse_receiving.php?updated=1");
-    exit;
-}
-
-// 3. Handle optional search from GET request
-$search = isset($_GET['search']) ? trim($_GET['search']) : '';
-$inventoryItems = [];
-
-if ($search !== '') {
-    if (ctype_digit($search)) {
-        $stmt = $new_pdo->prepare("SELECT * FROM inventory WHERE part_number = :search");
-        $stmt->bindValue(':search', (int)$search, PDO::PARAM_INT);
-    } else {
-        $stmt = $new_pdo->prepare("SELECT * FROM inventory WHERE description LIKE :like_search");
-        $stmt->bindValue(':like_search', "%$search%", PDO::PARAM_STR);
-    }
-    $stmt->execute();
-    $inventoryItems = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} else {
-    $stmt = $new_pdo->query("SELECT * FROM inventory");
-    $inventoryItems = $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
+// End PHP block before HTML
 ?>
 <!DOCTYPE html>
 <html>
@@ -108,60 +74,7 @@ if ($search !== '') {
     </script>
 </head>
 <body>
-    <h1 style="text-align:center;">Warehouse Inventory</h1>
-    <?php if (isset($_GET['updated'])): ?>
-        <p class="success">Inventory updated successfully.</p>
-    <?php endif; ?>
-
-    <div class="search-form">
-        <form method="GET" action="warehouse_receiving.php">
-            <label for="search">Search by Part Number or Description:</label>
-            <input type="text" id="search" name="search" value="<?= htmlspecialchars($search) ?>">
-            <input type="submit" value="Search">
-            <a href="warehouse_receiving.php" class="reset-link">Reset</a>
-        </form>
-        <br />
-        <div class="centered-button">
-            <input type="submit" form="update-form" value="Update Inventory">
-        </div>
-    </div>
-
-    <form method="POST" action="warehouse_receiving.php" id="update-form">
-        <div class="scroll-box">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Part #</th>
-                        <th>Description</th>
-                        <th>Stock</th>
-                        <th>Add New Stock</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (empty($inventoryItems)): ?>
-                        <tr><td colspan="4">No matching parts found.</td></tr>
-                    <?php else: ?>
-                        <?php foreach ($inventoryItems as $item): ?>
-                        <tr>
-                            <td><?= htmlspecialchars($item['part_number']) ?></td>
-                            <td><?= htmlspecialchars($item['description']) ?></td>
-                            <td><?= htmlspecialchars($item['quantity']) ?></td>
-                            <td>
-                                <div class="qty-wrapper">
-                                    <button type="button" class="qty-button" onclick="changeQty('qty_<?= $item['part_number'] ?>', -1)">-</button>
-                                    <input type="number" name="update[<?= htmlspecialchars($item['part_number']) ?>]" id="qty_<?= $item['part_number'] ?>" min="0" value="">
-                                    <button type="button" class="qty-button" onclick="changeQty('qty_<?= $item['part_number'] ?>', 1)">+</button>
-                                </div>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </tbody>
-            </table>
-        </div>
-        <div class="centered-button">
-            <input type="submit" value="Update Inventory">
-        </div>
-    </form>
+    <h1>Warehouse Receiving Page</h1>
 </body>
 </html>
+<?php

@@ -112,44 +112,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header("Location: cart.php?error=authorization");
             exit;
         }
-
-        try {
-            $new_pdo->beginTransaction();
-
-            $insertOrder = $new_pdo->prepare("INSERT INTO orders (total_price, shipping_address, shipping_handling_charge, customer_email) VALUES (?, ?, ?, ?)");
-            $insertOrder->execute([$actualTotal, $shipping_address, $shipping_charge, $email]);
-
-            $order_id = $new_pdo->lastInsertId();
-
-            foreach ($_SESSION['cart'] as $item) {
-                $check = $new_pdo->prepare("SELECT quantity FROM inventory WHERE part_number = ? FOR UPDATE");
-                $check->execute([$item['number']]);
-                $stock = $check->fetchColumn();
-
-                if ($stock === false || $stock < $item['quantity']) {
-                    throw new Exception("Insufficient stock for part #{$item['number']}");
-                }
-
-                $updateStock = $new_pdo->prepare("UPDATE inventory SET quantity = quantity - ? WHERE part_number = ?");
-                $updateStock->execute([$item['quantity'], $item['number']]);
-            }
-
-            $new_pdo->commit();
-            $_SESSION['cart'] = [];
-
-            echo "<!DOCTYPE html><html><head><title>Order Confirmation</title></head><body>";
-            echo "<h2>Order Success!</h2>";
-            echo "<p><strong>Your order ID is:</strong> {$order_id}</p>";
-            echo "<p><strong>Your payment authorization is:</strong> {$responseData['authorization']}</p>";
-            echo "<form action='parts list.php' method='get'>";
-            echo "<button type='submit'>Return to Parts List</button>";
-            echo "</form>";
-            echo "</body></html>";
-
-        } catch (Exception $e) {
-            $new_pdo->rollBack();
-            die("Checkout failed: " . $e->getMessage());
-        }
+    } else {
+        // Unknown action: simply redirect back
+        header("Location: cart.php");
         exit;
     }
 } else {
@@ -208,4 +173,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <?php endif; ?>
 </body>
 </html>
-<?php } ?>
+<?php
+}
+?>

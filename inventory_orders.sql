@@ -3,6 +3,7 @@ START TRANSACTION;
 -- Drop old tables
 DROP TABLE IF EXISTS inventory;
 DROP TABLE IF EXISTS orders;
+DROP TABLE IF EXISTS order_items;
 
 -- Create standalone inventory table
 CREATE TABLE inventory (
@@ -18,11 +19,19 @@ CREATE TABLE orders (
     total_price DECIMAL(10, 2) NOT NULL,            -- Total price for the order, including shipping/handling
     shipping_address VARCHAR(255) NOT NULL,         -- Shipping address for the order
     order_status ENUM('pending', 'shipped', 'completed', 'cancelled') DEFAULT 'pending', -- Order status
-    shipping_charge DECIMAL(10, 2) DEFAULT 0.00,    -- Shipping charge based on weight and method
-    handling_charge DECIMAL(10, 2) DEFAULT 0.00,    -- Handling charge, if applicable
+    shipping_handling_charge DECIMAL(10, 2) DEFAULT 0.00,    -- Shipping charge based on weight and method
+    customer_email VARCHAR(50) NOT NULL,    -- Customer email for the order
     tracking_number VARCHAR(100),                   -- Tracking number for shipment
     email_confirmation_sent BOOLEAN DEFAULT FALSE,  -- Whether email confirmation has been sent to customer
     shipment_confirmation_sent BOOLEAN DEFAULT FALSE -- Whether shipment confirmation has been sent
+);
+
+-- Create Order Contents table
+CREATE TABLE order_items (
+    order_id INT,
+    product_id INT,
+    quantity INT,
+    PRIMARY KEY (order_id, product_id)
 );
 
 INSERT INTO `inventory` (`part_number`, `description`, `stock`) VALUES

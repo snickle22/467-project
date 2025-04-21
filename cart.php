@@ -21,6 +21,16 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart'])) {
     }
 }
 $shipping_charge = getShippingCost($totalWeight);
+
+/* Getting shipping cost from database
+$getShipping = $new_pdo->prepare( 
+                    "SELECT shipping_cost FROM shipping_costs
+                    WHERE :weight BETWEEN start_weight AND end_weight
+                    LIMIT 1");
+$getShipping->execute(['weight' => $totalWeight]);
+$shipping_charge = $getShipping->fetchColumn();
+*/
+
 $actualTotal = $totalPrice + $shipping_charge;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

@@ -9,5 +9,3 @@ CREATE TABLE shipping_costs (
     shipping_cost DECIMAL(10, 2) NOT NULL
 
 );
-
-

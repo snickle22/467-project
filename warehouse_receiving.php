@@ -1,8 +1,6 @@
 <?php
-// 1. Connect to the database using the updated db_connect.php
-include 'db_connect.php'; // Provides $legacy_pdo and $new_pdo
+include 'db_connect.php';
 
-// 2. Handle POST request to add stock quantities
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['update']) && is_array($_POST['update'])) {
         $stmt = $new_pdo->prepare("UPDATE inventory SET quantity = quantity + :add_stock WHERE part_number = :number");
@@ -18,7 +16,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
-// 3. Handle optional search from GET request
 $search = isset($_GET['search']) ? trim($_GET['search']) : '';
 $inventoryItems = [];
 
@@ -41,46 +38,75 @@ if ($search !== '') {
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Warehouse Inventory</title>
+    <title>Warehouse Receiving</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .search-form { margin-bottom: 15px; text-align: center; }
-        .scroll-box {
-            max-height: 70vh;
-            overflow-y: auto;
-            border: 1px solid #ccc;
-            padding: 10px;
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 40px 20px;
+            background: url('https://wallpapers.com/images/featured/light-blue-2iuzyh711jo9bmgo.jpg') no-repeat center center/cover;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
-        .scroll-box table {
-            width: 80%;
-            margin: auto;
-            border-collapse: collapse;
-            table-layout: fixed;
+
+        .container {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 1100px;
+            width: 100%;
+            box-shadow: 0 0 10px rgba(0,0,0,0.4);
         }
-        table, th, td { border: 1px solid #ccc; }
-        th, td {
-            padding: 8px;
+
+        h1 {
             text-align: center;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
         }
-        th:nth-child(1), td:nth-child(1) { width: 8%; }
-        th:nth-child(2), td:nth-child(2) { width: 64%; word-wrap: break-word; }
-        th:nth-child(3), td:nth-child(3),
-        th:nth-child(4), td:nth-child(4) { width: 14%; }
+
+        .search-form {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .search-form input[type="text"] {
+            padding: 8px;
+            width: 250px;
+            border-radius: 5px;
+            border: none;
+        }
+
+        .scroll-box {
+            max-height: 65vh;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            color: black;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #ccc;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
 
         input[type="number"] {
-            width: 50px;
+            width: 60px;
             text-align: center;
-            -moz-appearance: textfield;
         }
-        input[type="number"]::-webkit-outer-spin-button,
-        input[type="number"]::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-
-        .success { color: green; text-align: center; }
-        .centered-button { text-align: center; margin-top: 10px; }
-        .reset-link { margin-left: 10px; font-size: 0.9em; }
 
         .qty-wrapper {
             display: flex;
@@ -88,6 +114,7 @@ if ($search !== '') {
             justify-content: center;
             gap: 5px;
         }
+
         .qty-button {
             width: 30px;
             height: 30px;
@@ -96,6 +123,45 @@ if ($search !== '') {
             border: 1px solid #ccc;
             background: #f4f4f4;
             cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .centered-button {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .menu-button {
+            padding: 12px 25px;
+            font-size: 16px;
+            cursor: pointer;
+            color: #fff;
+            background-color: rgb(12, 132, 252);
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 4px rgba(0, 0, 0, 0.2);
+            transition: background 0.2s ease-in-out;
+        }
+
+        .menu-button:hover {
+            background-color: rgb(0, 109, 218);
+        }
+
+        .menu-button:active {
+            background-color: #004a99;
+        }
+
+        .success {
+            color: #90ee90;
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .reset-link {
+            margin-left: 10px;
+            font-size: 0.9em;
+            color: #ddd;
         }
     </style>
     <script>
@@ -108,60 +174,63 @@ if ($search !== '') {
     </script>
 </head>
 <body>
-    <h1 style="text-align:center;">Warehouse Inventory</h1>
-    <?php if (isset($_GET['updated'])): ?>
-        <p class="success">Inventory updated successfully.</p>
-    <?php endif; ?>
+    <div class="container">
+        <h1>Warehouse Receiving</h1>
 
-    <div class="search-form">
-        <form method="GET" action="warehouse_receiving.php">
-            <label for="search">Search by Part Number or Description:</label>
-            <input type="text" id="search" name="search" value="<?= htmlspecialchars($search) ?>">
-            <input type="submit" value="Search">
-            <a href="warehouse_receiving.php" class="reset-link">Reset</a>
+        <?php if (isset($_GET['updated'])): ?>
+            <p class="success">Inventory updated successfully.</p>
+        <?php endif; ?>
+
+        <div class="search-form">
+            <form method="GET" action="warehouse_receiving.php">
+                <label for="search">Search by Part # or Description:</label>
+                <input type="text" id="search" name="search" value="<?= htmlspecialchars($search) ?>">
+                <input type="submit" value="Search" class="menu-button">
+                <a href="warehouse_receiving.php" class="reset-link">Reset</a>
+            </form>
+        </div>
+
+        <form method="POST" action="warehouse_receiving.php">
+            <div class="scroll-box">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Part #</th>
+                            <th>Description</th>
+                            <th>Current Stock</th>
+                            <th>Add Stock</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (empty($inventoryItems)): ?>
+                            <tr><td colspan="4">No matching parts found.</td></tr>
+                        <?php else: ?>
+                            <?php foreach ($inventoryItems as $item): ?>
+                            <tr>
+                                <td><?= htmlspecialchars($item['part_number']) ?></td>
+                                <td><?= htmlspecialchars($item['description']) ?></td>
+                                <td><?= htmlspecialchars($item['quantity']) ?></td>
+                                <td>
+                                    <div class="qty-wrapper">
+                                        <button type="button" class="qty-button" onclick="changeQty('qty_<?= $item['part_number'] ?>', -1)">-</button>
+                                        <input type="number" name="update[<?= htmlspecialchars($item['part_number']) ?>]" id="qty_<?= $item['part_number'] ?>" min="0">
+                                        <button type="button" class="qty-button" onclick="changeQty('qty_<?= $item['part_number'] ?>', 1)">+</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+            <div class="centered-button">
+                <input type="submit" value="Update Inventory" class="menu-button">
+            </div>
         </form>
-        <br />
+
         <div class="centered-button">
-            <input type="submit" form="update-form" value="Update Inventory">
+            <button type="button" onclick="window.location.href='menu.php'" class="menu-button">Back to Menu</button>
         </div>
     </div>
-
-    <form method="POST" action="warehouse_receiving.php" id="update-form">
-        <div class="scroll-box">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Part #</th>
-                        <th>Description</th>
-                        <th>Stock</th>
-                        <th>Add New Stock</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (empty($inventoryItems)): ?>
-                        <tr><td colspan="4">No matching parts found.</td></tr>
-                    <?php else: ?>
-                        <?php foreach ($inventoryItems as $item): ?>
-                        <tr>
-                            <td><?= htmlspecialchars($item['part_number']) ?></td>
-                            <td><?= htmlspecialchars($item['description']) ?></td>
-                            <td><?= htmlspecialchars($item['quantity']) ?></td>
-                            <td>
-                                <div class="qty-wrapper">
-                                    <button type="button" class="qty-button" onclick="changeQty('qty_<?= $item['part_number'] ?>', -1)">-</button>
-                                    <input type="number" name="update[<?= htmlspecialchars($item['part_number']) ?>]" id="qty_<?= $item['part_number'] ?>" min="0" value="">
-                                    <button type="button" class="qty-button" onclick="changeQty('qty_<?= $item['part_number'] ?>', 1)">+</button>
-                                </div>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </tbody>
-            </table>
-        </div>
-        <div class="centered-button">
-            <input type="submit" value="Update Inventory">
-        </div>
-    </form>
 </body>
 </html>

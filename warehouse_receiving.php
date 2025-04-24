@@ -200,6 +200,9 @@ if ($search !== '') {
         </div>
 
         <form method="POST" action="warehouse_receiving.php">
+            <div class="centered-button">
+                <input type="submit" value="Update Inventory" class="menu-button">
+            </div>
             <div class="scroll-box">
                 <table>
                     <thead>
@@ -231,9 +234,6 @@ if ($search !== '') {
                         <?php endif; ?>
                     </tbody>
                 </table>
-            </div>
-            <div class="centered-button">
-                <input type="submit" value="Update Inventory" class="menu-button">
             </div>
         </form>
     </div>

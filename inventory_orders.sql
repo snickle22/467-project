@@ -18,7 +18,7 @@ CREATE TABLE orders (
     order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Date and time the order was placed
     total_price DECIMAL(10, 2) NOT NULL,            -- Total price for the order, including shipping/handling
     shipping_address VARCHAR(255) NOT NULL,         -- Shipping address for the order
-    order_status ENUM('pending', 'shipped', 'completed', 'cancelled') DEFAULT 'pending', -- Order status
+    order_status ENUM('pending', 'shipped') DEFAULT 'pending', -- Order status
     shipping_handling_charge DECIMAL(10, 2) DEFAULT 0.00,    -- Shipping charge based on weight and method
     customer_email VARCHAR(50) NOT NULL,    -- Customer email for the order
     customer_name VARCHAR(50) NOT NULL,     -- Customer name for the order

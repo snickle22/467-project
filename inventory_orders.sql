@@ -21,6 +21,7 @@ CREATE TABLE orders (
     order_status ENUM('pending', 'shipped', 'completed', 'cancelled') DEFAULT 'pending', -- Order status
     shipping_handling_charge DECIMAL(10, 2) DEFAULT 0.00,    -- Shipping charge based on weight and method
     customer_email VARCHAR(50) NOT NULL,    -- Customer email for the order
+    customer_name VARCHAR(50) NOT NULL,     -- Customer name for the order
     tracking_number VARCHAR(100),                   -- Tracking number for shipment
     email_confirmation_sent BOOLEAN DEFAULT FALSE,  -- Whether email confirmation has been sent to customer
     shipment_confirmation_sent BOOLEAN DEFAULT FALSE -- Whether shipment confirmation has been sent

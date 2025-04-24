@@ -161,9 +161,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $insertOrder = $new_pdo->prepare(
                 "INSERT INTO orders
-                     (total_price, shipping_address, shipping_handling_charge, customer_email)
-                 VALUES (?, ?, ?, ?)");
-            $insertOrder->execute([$actualTotal, $shipping_address, $shipping_charge, $customer_email]);
+                     (customer_name, total_price, shipping_address, shipping_handling_charge, customer_email)
+                 VALUES (?, ?, ?, ?, ?)");
+            $insertOrder->execute([$name, $actualTotal, $shipping_address, $shipping_charge, $customer_email]);
 
             $order_id   = $new_pdo->lastInsertId();
             $insertItem = $new_pdo->prepare(
@@ -194,13 +194,68 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $new_pdo->commit();
             $_SESSION['cart'] = [];
 
-            echo "<!DOCTYPE html><html><head><title>Order Confirmation</title></head><body>";
-            echo "<h2>Order Success!</h2>";
-            echo "<p><strong>Your order ID is:</strong> {$order_id}</p>";
-            echo "<p><strong>Your payment authorization is:</strong> {$responseData['authorization']}</p>";
-            echo "<form action='parts list.php' method='get'>";
-            echo "<button type='submit'>Return to Parts List</button>";
-            echo "</form></body></html>";
+            echo <<<HTML
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Order Confirmation</title>
+                <style>
+                    html, body {
+                        height: 100%;
+                        margin: 0;
+                        font-family: Arial, sans-serif;
+                        background: url('https://wallpapers.com/images/featured/light-blue-2iuzyh711jo9bmgo.jpg') no-repeat center center fixed;
+                        background-size: cover;
+                        color: white;
+                    }
+                    .container {
+                        width: 80%;
+                        margin: auto;
+                        padding: 30px;
+                        background-color: rgba(0, 0, 0, 0.5);
+                        border-radius: 12px;
+                        margin-top: 40px;
+                        text-align: center;
+                    }
+                    h2 {
+                        margin-bottom: 20px;
+                        text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.5);
+                    }
+                    p {
+                        font-size: 18px;
+                        margin: 10px 0;
+                    }
+                    button {
+                        padding: 10px 20px;
+                        font-size: 16px;
+                        background-color: rgb(12, 132, 252);
+                        color: white;
+                        border: none;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        margin-top: 20px;
+                    }
+                    button:hover {
+                        background-color: rgb(0, 109, 218);
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <h2>Order Success!</h2>
+                    <p><strong>Your order ID is:</strong> {$order_id}</p>
+                    <p><strong>Your payment authorization is:</strong> {$responseData['authorization']}</p>
+                    <form action='parts list.php' method='get'>
+                        <button type='submit'>Return to Parts List</button>
+                    </form>
+                    <form action='menu.php' method='get'>
+                        <button type='submit'>Back to Menu</button>
+                    </form>
+                </div>
+            </body>
+            </html>
+            HTML;
+
 
         } catch (Exception $e) {
             $new_pdo->rollBack();
@@ -217,69 +272,162 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <title>Your Cart</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 8px 12px; border: 1px solid #ccc; text-align: center; }
-        input[type='number'] { width: 60px; }
-        form { margin-top: 20px; }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: url('https://wallpapers.com/images/featured/light-blue-2iuzyh711jo9bmgo.jpg') no-repeat center center/cover;
+            color: white;
+        }
+
+        .container {
+            width: 80%;
+            margin: auto;
+            padding: 30px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 12px;
+            margin-top: 40px;
+        }
+
+        a {
+            color: #add8ff;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        h1, h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: white;
+            color: black;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 10px 15px;
+            border: 1px solid #ccc;
+            text-align: center;
+        }
+
+        input[type='number'], input[type='text'], input[type='email'] {
+            width: 100%;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+
+        form {
+            margin-top: 20px;
+        }
+
+        label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+
+        .submit-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .submit-container input[type="submit"],
+        .submit-container button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: rgb(12, 132, 252);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .submit-container input[type="submit"]:hover,
+        .submit-container button:hover {
+            background-color: rgb(0, 109, 218);
+        }
     </style>
 </head>
 <body>
-<a href="parts list.php">&larr; Back to Parts List</a>
-<h1>Your Shopping Cart</h1>
+<div class="container">
+    <a href="parts list.php">&larr; Back to Parts List</a>
+    <h1>Your Shopping Cart</h1>
 
-<?php if (!empty($_SESSION['cart'])): ?>
-    <form method="post" action="cart.php">
-        <table>
-            <thead>
-            <tr>
-                <th>Part #</th>
-                <th>Description</th>
-                <th>Price</th>
-                <th>Weight</th>
-                <th>Quantity</th>
-            </tr>
-            </thead>
-            <tbody>
-            <?php foreach ($_SESSION['cart'] as $item): ?>
+    <?php if (!empty($_SESSION['cart'])): ?>
+        <form method="post" action="cart.php">
+            <table>
+                <thead>
                 <tr>
-                    <td><?= htmlspecialchars($item['number']) ?></td>
-                    <td><?= htmlspecialchars($item['description']) ?></td>
-                    <td>$<?= number_format($item['price'], 2) ?></td>
-                    <td><?= htmlspecialchars($item['weight']) ?> lbs</td>
-                    <td>
-                        <input type="number"
-                               name="quantities[<?= htmlspecialchars($item['number']) ?>]"
-                               value="<?= htmlspecialchars($item['quantity']) ?>"
-                               min="0">
-                    </td>
+                    <th>Part #</th>
+                    <th>Description</th>
+                    <th>Price</th>
+                    <th>Weight</th>
+                    <th>Quantity</th>
                 </tr>
-            <?php endforeach; ?>
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                <?php foreach ($_SESSION['cart'] as $item): ?>
+                    <tr>
+                        <td><?= htmlspecialchars($item['number']) ?></td>
+                        <td><?= htmlspecialchars($item['description']) ?></td>
+                        <td>$<?= number_format($item['price'], 2) ?></td>
+                        <td><?= htmlspecialchars($item['weight']) ?> lbs</td>
+                        <td>
+                            <input type="number"
+                                   name="quantities[<?= htmlspecialchars($item['number']) ?>]"
+                                   value="<?= htmlspecialchars($item['quantity']) ?>"
+                                   min="0">
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
 
-        <p><strong>Total Price:</strong> $<?= number_format($totalPrice, 2) ?></p>
-        <p><strong>Shipping (<?= $totalWeight ?> lbs):</strong> $<?= number_format($shipping_charge, 2) ?></p>
-        <p><strong>Final Total:</strong> $<?= number_format($actualTotal, 2) ?></p>
+            <p><strong>Total Price:</strong> $<?= number_format($totalPrice, 2) ?></p>
+            <p><strong>Shipping (<?= $totalWeight ?> lbs):</strong> $<?= number_format($shipping_charge, 2) ?></p>
+            <p><strong>Final Total:</strong> $<?= number_format($actualTotal, 2) ?></p>
 
-        <input type="hidden" name="action" value="update">
-        <input type="submit" value="Update Cart">
-    </form>
+            <input type="hidden" name="action" value="update">
+            <div class="submit-container">
+                <input type="submit" value="Update Cart">
+            </div>
+        </form>
 
-    <h2>Checkout</h2>
-    <form method="post" action="cart.php">
-        <label>Name: <input type="text" name="name" required></label><br><br>
-        <label>Email: <input type="email" name="customer_email" required></label><br><br>
-        <label>Shipping Address: <input type="text" name="shipping_address" required></label><br><br>
-        <label>Credit Card #: <input type="text" name="cc" placeholder="6011 1234 4321 1234" required></label><br><br>
-        <label>Exp Date: <input type="text" name="exp" placeholder="MM/YYYY" required></label><br><br>
+        <h2>Checkout</h2>
+        <form method="post" action="cart.php">
+            <label>Name:</label>
+            <input type="text" name="name" required>
 
-        <input type="hidden" name="action" value="checkout">
-        <input type="submit" value="Place Order">
-    </form>
-<?php else: ?>
-    <p>Your cart is empty.</p>
-<?php endif; ?>
+            <label>Email:</label>
+            <input type="email" name="customer_email" required>
+
+            <label>Shipping Address:</label>
+            <input type="text" name="shipping_address" required>
+
+            <label>Credit Card #:</label>
+            <input type="text" name="cc" placeholder="6011 1234 4321 1234" required>
+
+            <label>Exp Date:</label>
+            <input type="text" name="exp" placeholder="MM/YYYY" required>
+
+            <input type="hidden" name="action" value="checkout">
+            <div class="submit-container">
+                <input type="submit" value="Place Order">
+            </div>
+        </form>
+    <?php else: ?>
+        <p>Your cart is empty.</p>
+    <?php endif; ?>
+</div>
 </body>
 </html>
-

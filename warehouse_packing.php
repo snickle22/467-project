@@ -48,9 +48,12 @@ unset($order);
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ship_order_id'])) {
     $orderId = intval($_POST['ship_order_id']);
 
+    // Generate random 8-digit tracking number
+    $trackingNumber = str_pad(random_int(0, 99999999), 8, '0', STR_PAD_LEFT);
+
     // Mark order as shipped
-    $update = $new_pdo->prepare("UPDATE orders SET order_status = 'shipped' WHERE order_id = :id");
-    $update->execute([':id' => $orderId]);
+    $update = $new_pdo->prepare("UPDATE orders SET order_status = 'shipped', tracking_number = :tracking WHERE order_id = :id");
+    $update->execute([':id' => $orderId, ':tracking' => $trackingNumber]);
 
     // Fetch customer email
     $emailQuery = $new_pdo->prepare("SELECT customer_email FROM orders WHERE order_id = :id");
@@ -58,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ship_order_id'])) {
     $email = $emailQuery->fetchColumn();
 
     // Log email confirmation
-    file_put_contents('emails.log', "Order $orderId shipped email sent to $email\n", FILE_APPEND);
+    file_put_contents('emails.log', "Order $orderId shipped (Tracking: $trackingNumber) - email sent to $email\n", FILE_APPEND);
 
     // Redirect
     header("Location: warehouse_packing.php?shipped=1");
@@ -70,49 +73,159 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ship_order_id'])) {
 <head>
     <title>Warehouse Packing</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        table { width: 90%; margin: auto; border-collapse: collapse; }
-        th, td { padding: 10px; border: 1px solid #ccc; text-align: left; }
-        .center { text-align: center; }
+        html, body {
+            height: 100%;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: url('https://wallpapers.com/images/featured/light-blue-2iuzyh711jo9bmgo.jpg') no-repeat center center/cover;
+            background-size: cover;
+            color: white;
+        }
+
+        .container {
+            width: 90%;
+            margin: auto;
+            padding: 30px;
+            margin-top: 40px;
+            background-color: rgba(0, 0, 0, 0.6);
+            border-radius: 12px;
+            position: relative;
+        }
+
+        a {
+            color: #cce6ff;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            color: black;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+            vertical-align: center;
+            word-wrap: break-word;
+        }
+
+        th {
+            background-color: rgb(12, 132, 252);
+            color: white;
+        }
+
+        td:nth-child(2) {
+            max-width: 300px;
+            white-space: normal;
+            word-break: break-word;
+        }
+
+        tr:hover {
+            background-color: #f2f2f2;
+        }
+
+        .center {
+            text-align: center;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 2px rgb(12, 132, 252) solid;
+            background-color: white;
+            color: black;
+            text-decoration: none;
+            transition: 0.3s;
+            text-align: center;
+        }
+
+        .button:hover {
+            background-color: rgb(12, 132, 252);
+            color: white;
+        }
+
+        .button2 {
+            background-color: white;
+            color: black;
+            border: 2px rgb(12, 132, 252) solid;
+        }
+
+        .button2:hover {
+            background-color: rgb(12, 132, 252);
+            color: white;
+        }
+
+        .success-msg {
+            text-align: center;
+            color: #00ff88;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
-    <h1 class="center">Warehouse Packing Interface</h1>
-    <?php if (isset($_GET['shipped'])): ?>
-        <p class="center" style="color:green;">Order marked as shipped and email sent!</p>
-    <?php endif; ?>
+    <div class="container">
+        <a href="menu.php">Home</a>
+        <h1>Warehouse Packing Interface</h1>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Order ID</th>
-                <th>Items</th>
-                <th>Customer Email</th>
-                <th>Status</th>
-                <th>Print</th>
-                <th>Mark as Shipped</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($orders as $order): ?>
-            <tr>
-                <td><?= htmlspecialchars($order['order_id']) ?></td>
-                <td><?= htmlspecialchars($order['items']) ?></td>
-                <td><?= htmlspecialchars($order['customer_email']) ?></td>
-                <td><?= htmlspecialchars($order['order_status']) ?></td>
-                <td><a href="print_documents.php?order_id=<?= $order['order_id'] ?>" target="_blank">Print</a></td>
-                <td>
-                    <form method="POST" action="warehouse_packing.php">
-                        <input type="hidden" name="ship_order_id" value="<?= $order['order_id'] ?>">
-                        <button type="submit">Ship Order</button>
+        <?php if (isset($_GET['shipped'])): ?>
+            <p class="success-msg">Order marked as shipped and email sent!</p>
+        <?php endif; ?>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Items</th>
+                    <th>Customer Email</th>
+                    <th>Status</th>
+                    <th>Print</th>
+                    <th>Mark as Shipped</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($orders as $order): ?>
+                <tr>
+                    <td><?= htmlspecialchars($order['order_id']) ?></td>
+                    <td><?= htmlspecialchars($order['items']) ?></td>
+                    <td><?= htmlspecialchars($order['customer_email']) ?></td>
+                    <td><?= htmlspecialchars($order['order_status']) ?></td>
+                    <td>
+                    <form method="POST" action="print_documents.php" style="display:inline;">
+                        <input type="hidden" name="order_id" value="<?= $order['order_id'] ?>">
+                        <button type="submit" class="button">Print</button>
                     </form>
-                </td>
-            </tr>
-            <?php endforeach; ?>
-            <?php if (count($orders) === 0): ?>
-            <tr><td colspan="6" class="center">No orders ready to ship.</td></tr>
-            <?php endif; ?>
-        </tbody>
-    </table>
+                    </td>
+
+                    <td>
+                    <form method="POST" action="warehouse_packing.php" style="display:inline;">
+                        <input type="hidden" name="ship_order_id" value="<?= $order['order_id'] ?>">
+                        <button type="submit" class="button">Ship Order</button>
+                    </form>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+                <?php if (count($orders) === 0): ?>
+                <tr><td colspan="6" class="center">No orders ready to ship.</td></tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
 </body>
 </html>

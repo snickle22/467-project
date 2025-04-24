@@ -60,6 +60,14 @@ if ($search !== '') {
             box-shadow: 0 0 10px rgba(0,0,0,0.4);
         }
 
+        a {
+            color: #cce6ff;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-decoration: none;
+            display: inline-block;
+        }
+
         h1 {
             text-align: center;
             margin-bottom: 20px;
@@ -175,6 +183,7 @@ if ($search !== '') {
 </head>
 <body>
     <div class="container">
+        <a href="menu.php">Home</a>
         <h1>Warehouse Receiving</h1>
 
         <?php if (isset($_GET['updated'])): ?>
@@ -227,10 +236,6 @@ if ($search !== '') {
                 <input type="submit" value="Update Inventory" class="menu-button">
             </div>
         </form>
-
-        <div class="centered-button">
-            <button type="button" onclick="window.location.href='menu.php'" class="menu-button">Back to Menu</button>
-        </div>
     </div>
 </body>
 </html>

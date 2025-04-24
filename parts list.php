@@ -41,6 +41,14 @@ foreach ($parts as &$part) {
             margin-top: 40px;
         }
 
+        a {
+            color: #cce6ff;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-decoration: none;
+            display: inline-block;
+        }
+
         h1 {
             text-align: center;
             margin-bottom: 30px;
@@ -115,6 +123,8 @@ foreach ($parts as &$part) {
 </head>
 <body>
 <div class="container">
+    <a href="menu.php">Home</a>
+
     <h1>Available Parts</h1>
     <form method="post" action="cart.php">
         <div class="submit-container">
@@ -142,9 +152,6 @@ foreach ($parts as &$part) {
         </div>
         <input type="hidden" name="action" value="bulk_add">
     </form>
-    <div class="submit-container">
-        <button type="button" onclick="window.location.href='menu.php'">Back to Menu</button>
-    </div>
 </div>
 </body>
 </html>

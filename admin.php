@@ -1,56 +1,80 @@
-
-
+<!DOCTYPE html>
 <html>
 <head>
-<style>
-.button{
-    border: none;
-    color: white;
-    padding: 16px 32px;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 16px;
-    margin: 4px 2px;
-    transition-duration: 0.4s;
-    cursor: pointer;
-}
+    <title>Administration Page</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background: url('https://wallpapers.com/images/featured/light-blue-2iuzyh711jo9bmgo.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: white;
+        }
 
-.button1{
-    background-color: white;
-    color: black;
-    border 2px solid #04AA6D;
-}
+        .container {
+            width: 90%;
+            margin: auto;
+            padding: 30px;
+            margin-top: 40px;
+            background-color: rgba(0, 0, 0, 0.6);
+            border-radius: 12px;
+        }
 
-.button1:hover {
-background-color: #04AA6D;
-color: white;
-}
+        .nav-links {
+            margin-bottom: 20px;
+        }
 
-.button2 {
-background-color: white;
-color: black;
-border 2px solid #008CBA;
-}
+        a {
+            color: #cce6ff;
+            font-weight: bold;
+            margin-right: 20px;
+            text-decoration: none;
+        }
 
-.button2:hover {
-background-color: #008CBA;
-color: white;
-}
+        h2 {
+            text-align: center;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+        }
 
-</style>
+        form {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: rgb(12, 132, 252);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+        }
+
+        button:hover {
+            background-color: rgb(0, 109, 218);
+        }
+    </style>
 </head>
 <body>
-<a href="index.php">Home</a>
-<h2> Administration Page </h2>
+    <div class="container">
+        <div class="nav-links">
+            <a href="menu.php">Home</a>
+        </div>
 
-<form action="order.php" method="GET">
-<button type="submit" class="button button1">Orders</button>
-</form>
+        <h2>Administration Page</h2>
 
-<form action="shipping.php" method="GET">
-<button type="submit" class="button button2">Shipping</button>
-</form>
+        <form action="order.php" method="GET">
+            <button type="submit">Orders</button>
+        </form>
 
-
+        <form action="shipping.php" method="GET">
+            <button type="submit">Shipping</button>
+        </form>
+    </div>
 </body>
 </html>
+

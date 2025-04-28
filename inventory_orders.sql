@@ -23,7 +23,7 @@ CREATE TABLE orders (
     customer_email VARCHAR(50) NOT NULL,    -- Customer email for the order
     customer_name VARCHAR(50) NOT NULL,     -- Customer name for the order
     tracking_number VARCHAR(100),                   -- Tracking number for shipment
-    email_confirmation_sent BOOLEAN DEFAULT FALSE,  -- Whether email confirmation has been sent to customer
+    email_confirmation_sent BOOLEAN DEFAULT TRUE,  -- Whether email confirmation has been sent to customer
     shipment_confirmation_sent BOOLEAN DEFAULT FALSE -- Whether shipment confirmation has been sent
 );
 

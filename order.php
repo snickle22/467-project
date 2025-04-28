@@ -132,9 +132,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && !empty($_GET)) {
         tr:hover {
             background-color: #f2f2f2;
         }
+        
+        .popup{
+            display: none;
+            position: fixed;
+            top: 30%;
+            left: 50%;
+            transform: translate(-50%, -30%);
+            color: black;
+            background: white;
+            padding: 20px;
+            border: 1px solid black;
+            z-index: 1000;
+        }    
+
+   .popup:target{
+        display: block;
+    }
+
     </style>
 </head>
 <body>
+
     <div class="container">
         <a href="admin.php">Admin Home Page</a>
         <a href="menu.php">Home</a>
@@ -155,8 +174,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && !empty($_GET)) {
                 <option value="all">All</option>
                 <option value="pending">Pending</option>
                 <option value="shipped">Shipped</option>
-                <option value="completed">Completed</option>
-                <option value="cancelled">Cancelled</option>
             </select>
             <br>
 
@@ -187,6 +204,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && !empty($_GET)) {
             <?php
             if (empty($orders)) {
                 echo '<tr><td colspan="10" style="text-align:center;">No orders found.</td></tr>';
+            
             } else {
                 foreach ($orders as $order) {
                     echo "<tr>";
@@ -198,13 +216,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && !empty($_GET)) {
                     echo "<td>" . htmlspecialchars($order['order_status']) . "</td>";
                     echo "<td>$" . htmlspecialchars($order['shipping_handling_charge']) . "</td>";
                     echo "<td>" . ($order['tracking_number'] === NULL ? "Not yet shipped" : htmlspecialchars($order['tracking_number'])) . "</td>";
-                    echo "<td>" . ($order['email_confirmation_sent'] === "TRUE" ? "Yes" : "No") . "</td>";
-                    echo "<td>" . ($order['shipment_confirmation_sent'] === "TRUE" ? "Yes" : "No") . "</td>";
-                    echo "</tr>";
+                 
+
+                   
+                    echo "<td>" . ($order['email_confirmation_sent'] === 1 ? '<a href="#confirm_popup_'.htmlspecialchars($order['order_id']).'">Yes</a>' : "No") . "</td>";?>
+
+                    <div id="confirm_popup_<?php echo htmlspecialchars($order['order_id']);?>" class="popup">
+                        <a href="#">close</a>
+                        <p>Hello <?php echo htmlspecialchars($order['customer_name']); ?>, </br></br>
+                        Thank you for your recent purchase. This email is to confirm your order placement on <b> <?php echo htmlspecialchars($order['order_date']); ?></b> with the order id:<b> <?php echo htmlspecialchars($order['order_id'])?>.</b> </br> </br>
+                       
+                        Please expect an email confirming shipping within the next 48 hours with your tracking number. </br></br>
+                        If you did not place this order please contact us at (800) 567-9876.</br></br>
+                        Thank you, </br>
+                        USA Supplies, Inc
+                        </p>
+                    </div>
+
+                   <?php echo "<td>" . ($order['shipment_confirmation_sent'] === 1 ? '<a href="#shipment_popup_'.htmlspecialchars($order['order_id']).'">Yes</a>' : "No") . "</td>";?>
+                    
+                    <div id="shipment_popup_<?php echo htmlspecialchars($order['order_id']);?>" class="popup">
+                        <a href="#">close</a>
+                        <p>Hello <?php echo htmlspecialchars($order['customer_name']); ?>, </br></br>
+                        Thank you for your recent purchase. Your tracking number is:<b> <?php echo htmlspecialchars($order['tracking_number'])?></b>. </br> </br>
+                        Please expect your delivery through USPS within 5 - 10 business days.</br></br>
+                        If you did not place this order please contact us at (800) 567-9876.</br></br>
+                        Thank you, </br>
+                        USA Supplies, Inc
+                        </p>
+                    </div>
+
+
+                 <?php   echo "</tr>";
                 }
             }
             ?>
         </table>
     </div>
+     
 </body>
 </html>

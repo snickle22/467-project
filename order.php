@@ -233,7 +233,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && !empty($_GET)) {
                         </p>
                     </div>
 
-                   <?php echo "<td>" . ($order['shipment_confirmation_sent'] === 1 ? '<a href="#shipment_popup_'.htmlspecialchars($order['order_id']).'">Yes</a>' : "No") . "</td>";?>
+                   <?php echo "<td>" . (($order['shipment_confirmation_sent'] == 1 || $order['order_status'] == 'shipped') ? '<a href="#shipment_popup_'.htmlspecialchars($order['order_id']).'">Yes</a>' : "No") . "</td>";?>
                     
                     <div id="shipment_popup_<?php echo htmlspecialchars($order['order_id']);?>" class="popup">
                         <a href="#">close</a>

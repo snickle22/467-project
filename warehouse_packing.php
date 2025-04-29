@@ -15,7 +15,28 @@ $orderStmt = $new_pdo->prepare("
 $orderStmt->execute();
 $rows = $orderStmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Step 2: Organize orders
+// Step 2: Ensure all pending orders have tracking numbers
+foreach ($rows as $row) {
+    $orderId = $row['order_id'];
+
+    // Check if tracking number is missing
+    $trackingCheck = $new_pdo->prepare("SELECT tracking_number FROM orders WHERE order_id = ?");
+    $trackingCheck->execute([$orderId]);
+    $trackingNumber = $trackingCheck->fetchColumn();
+
+    if (empty($trackingNumber)) {
+        // If no tracking number, create one
+        $newTracking = str_pad(random_int(0, 99999999), 8, '0', STR_PAD_LEFT);
+
+        $updateTracking = $new_pdo->prepare("UPDATE orders SET tracking_number = :tracking WHERE order_id = :id");
+        $updateTracking->execute([
+            ':tracking' => $newTracking,
+            ':id' => $orderId
+        ]);
+    }
+}
+
+// Step 3: Organize orders
 $orders = [];
 
 foreach ($rows as $row) {
@@ -26,34 +47,42 @@ foreach ($rows as $row) {
             'order_id' => $orderId,
             'customer_email' => $row['customer_email'],
             'order_status' => $row['order_status'],
-            'items' => []
+            'items' => [],
+            'tracking_number' => '' // To store tracking number
         ];
     }
 
-    // Step 3: Lookup description from legacy DB
+    // Step 4: Lookup description from legacy DB
     $descStmt = $legacy_pdo->prepare("SELECT description FROM parts WHERE number = ?");
     $descStmt->execute([$row['product_id']]);
     $description = $descStmt->fetchColumn() ?: 'Unknown Part';
 
     $orders[$orderId]['items'][] = "{$row['quantity']} x $description";
+    
+    // Get the tracking number
+    $trackingStmt = $new_pdo->prepare("SELECT tracking_number FROM orders WHERE order_id = ?");
+    $trackingStmt->execute([$orderId]);
+    $orders[$orderId]['tracking_number'] = $trackingStmt->fetchColumn();
 }
 
-// Step 4: Convert items to string
+// Step 5: Convert items to string
 foreach ($orders as &$order) {
     $order['items'] = implode(', ', $order['items']);
 }
 unset($order);
 
-// Step 5: Handle shipping form POST
+// Step 6: Handle shipping form POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ship_order_id'])) {
     $orderId = intval($_POST['ship_order_id']);
 
-    // Generate random 8-digit tracking number
-    $trackingNumber = str_pad(random_int(0, 99999999), 8, '0', STR_PAD_LEFT);
+    // Fetch the existing tracking number
+    $trackingQuery = $new_pdo->prepare("SELECT tracking_number FROM orders WHERE order_id = :id");
+    $trackingQuery->execute([':id' => $orderId]);
+    $trackingNumber = $trackingQuery->fetchColumn();
 
-    // Mark order as shipped
-    $update = $new_pdo->prepare("UPDATE orders SET order_status = 'shipped', tracking_number = :tracking WHERE order_id = :id");
-    $update->execute([':id' => $orderId, ':tracking' => $trackingNumber]);
+    // Mark order as shipped (no need to change tracking number)
+    $update = $new_pdo->prepare("UPDATE orders SET order_status = 'shipped', tracking_number = :tracking, shipment_confirmation_sent = TRUE WHERE order_id = :id");
+    $update->execute([':id' => $orderId]);
 
     // Fetch customer email
     $emailQuery = $new_pdo->prepare("SELECT customer_email FROM orders WHERE order_id = :id");
@@ -195,6 +224,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ship_order_id'])) {
                     <th>Items</th>
                     <th>Customer Email</th>
                     <th>Status</th>
+                    <th>Tracking Number</th>
                     <th>Print</th>
                     <th>Mark as Shipped</th>
                 </tr>
@@ -206,6 +236,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ship_order_id'])) {
                     <td><?= htmlspecialchars($order['items']) ?></td>
                     <td><?= htmlspecialchars($order['customer_email']) ?></td>
                     <td><?= htmlspecialchars($order['order_status']) ?></td>
+                    <td><?= htmlspecialchars($order['tracking_number']) ?></td>
                     <td>
                     <form method="POST" action="print_documents.php" style="display:inline;">
                         <input type="hidden" name="order_id" value="<?= $order['order_id'] ?>">
@@ -222,7 +253,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ship_order_id'])) {
                 </tr>
                 <?php endforeach; ?>
                 <?php if (count($orders) === 0): ?>
-                <tr><td colspan="6" class="center">No orders ready to ship.</td></tr>
+                <tr><td colspan="7" class="center">No orders ready to ship.</td></tr>
                 <?php endif; ?>
             </tbody>
         </table>

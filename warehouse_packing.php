@@ -82,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ship_order_id'])) {
 
     // Mark order as shipped (no need to change tracking number)
     $update = $new_pdo->prepare("UPDATE orders SET order_status = 'shipped', tracking_number = :tracking, shipment_confirmation_sent = TRUE WHERE order_id = :id");
-    $update->execute([':id' => $orderId]);
+    $update->execute([':id' => $orderId, 'tracking' => $trackingNumber]);
 
     // Fetch customer email
     $emailQuery = $new_pdo->prepare("SELECT customer_email FROM orders WHERE order_id = :id");
